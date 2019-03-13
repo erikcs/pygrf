@@ -24,7 +24,9 @@ Misc
 
 _Data()
 * sparse, rowMajor
-* https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/linear_model/cd_fast.pyx#L105
+* memoryviews:
+
+  https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/linear_model/cd_fast.pyx#L105
 * input check
 * .sort() ?
 

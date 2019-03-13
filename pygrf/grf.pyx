@@ -46,7 +46,7 @@ cdef class _Data:
     self.data.set_outcome_index(p)
     self.data.sort() # ?
 
-    def __dealloc__(self):
+  def __dealloc__(self):
       del self.data
 
 
