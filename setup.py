@@ -4,12 +4,11 @@ import os
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
 
-setup_dir = os.path.abspath(os.path.dirname(__file__))
 
-# OSX specific...
 COMPILE_ARGS = ['-std=c++11', '-stdlib=libc++', '-Wall', '-O2', '-pthread']
 LINK_ARGS = ['-stdlib=libc++']
 
+setup_dir = os.path.abspath(os.path.dirname(__file__))
 INCLUDE_DIRS = [os.path.join(setup_dir, 'pygrf/grf/core/src')]
 INCLUDE_DIRS.append(os.path.join(setup_dir, 'pygrf/grf/core/third_party'))
 INCLUDE_DIRS.append(numpy.get_include())

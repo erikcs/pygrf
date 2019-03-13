@@ -1,7 +1,6 @@
-# TODO: add except + to constructors
+from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.memory cimport shared_ptr
-from libcpp cimport bool
 from libcpp.string cimport string
 
 ctypedef unsigned int uint
@@ -14,8 +13,6 @@ cdef extern from '<iostream>' namespace 'std':
 cdef extern from '<sstream>' namespace 'std':
   cdef cppclass stringstream(ostream):
     string str();
-
-# -----------------------------------------------------------------------------
 
 # Data()
 cdef extern from 'grf/core/src/commons/Data.h':
@@ -54,7 +51,7 @@ cdef extern from 'grf/core/src/forest/Forest.h':
 cdef extern from 'grf/core/src/forest/Forest.cpp':
       pass
 
-# Forest()
+# Tree()
 cdef extern from 'grf/core/src/tree/Tree.h':
   cdef cppclass Tree:
     pass
@@ -65,10 +62,7 @@ cdef extern from 'grf/core/src/tree/Tree.cpp':
 # ForestSerializer()
 cdef extern from 'grf/core/src/serialization/ForestSerializer.h':
   cdef cppclass ForestSerializer:
-    # ForestSerializer(ForestSerializer&);
-
     void serialize(ostream& stream, const Forest& forest);
-    # void serialize(ostream& stream, Forest& forest);
 
 cdef extern from 'grf/core/src/serialization/ForestSerializer.cpp':
   pass
@@ -77,7 +71,6 @@ cdef extern from 'grf/core/src/serialization/ForestSerializer.cpp':
 cdef extern from 'grf/core/src/forest/ForestOptions.h':
   cdef cppclass ForestOptions:
     ForestOptions(ForestOptions&);
-
     ForestOptions(uint num_trees, size_t ci_group_size, double sample_fraction,
                   uint mtry,
                   uint min_node_size, bool honesty, double honesty_fraction,
@@ -91,8 +84,7 @@ cdef extern from 'grf/core/src/forest/ForestOptions.cpp':
 # ForestTrainer()
 cdef extern from 'grf/core/src/forest/ForestTrainer.h':
   cdef cppclass ForestTrainer:
-    ForestTrainer(ForestTrainer&); # Cython specific: need a copy constructor (init. from staticmethod)
-
+    ForestTrainer(ForestTrainer&);
     ForestTrainer(shared_ptr[RelabelingStrategy] relabeling_strategy,
                   shared_ptr[SplittingRuleFactory] splitting_rule_factory,
                   shared_ptr[OptimizedPredictionStrategy] prediction_strategy);
@@ -116,11 +108,6 @@ cdef extern from 'grf/core/src/relabeling/RelabelingStrategy.h':
   cdef cppclass RelabelingStrategy:
     pass
 
-# NoopRelabelingStrategy()
-# cdef extern from 'grf/core/src/relabeling/NoopRelabelingStrategy.h':
-  # cdef cppclass NoopRelabelingStrategy(RelabelingStrategy):
-    # pass
-
 # SplittingRuleFactory()
 cdef extern from 'grf/core/src/splitting/factory/SplittingRuleFactory.h':
   cdef cppclass SplittingRuleFactory:
@@ -130,5 +117,3 @@ cdef extern from 'grf/core/src/splitting/factory/SplittingRuleFactory.h':
 cdef extern from 'grf/core/src/prediction/OptimizedPredictionStrategy.h':
   cdef cppclass OptimizedPredictionStrategy:
     pass
-
-# -----------------------------------------------------------------------------

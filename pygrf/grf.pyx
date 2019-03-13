@@ -1,17 +1,9 @@
-# TODO: add @boundscheck and @wraparound where appropriate.
-# (Cython profiling yellow lines)
 import numpy as np
 cimport numpy as np
-from cython cimport floating
 from cython.operator cimport dereference as deref
 
 from grfheaders cimport *
 
-# from cython cimport numeric # TODO
-
-# fra stan:
-# bytes, going into C++ code
- # model_code_bytes = model_code.encode('utf-8')
 
 # Utils
 # -----------------------------------------------------------------------------
@@ -39,18 +31,15 @@ cdef class _Serialize:
   def __dealloc__(self):
     del self.serializer
 
-# Todo: sparse, rowMajor
+
 cdef class _Data:
 
   cdef Data* data
 
-  # https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/linear_model/cd_fast.pyx#L105 ?
   def __cinit__(self, np.ndarray X, np.ndarray y):
-    # TODO input check
     cdef uint n = X.shape[0]
     cdef uint p = X.shape[1]
     assert len(y) == n
-    # cdef np.ndarray Xy = np.c_[X, y]
     cdef np.ndarray Xy = np.asfortranarray( np.c_[X, y] )
 
     self.data = new DefaultData(<double*> Xy.data, n, p + 1)
@@ -59,6 +48,7 @@ cdef class _Data:
 
     def __dealloc__(self):
       del self.data
+
 
 cdef class _ForestOptions:
 
@@ -97,6 +87,7 @@ cdef class _ForestOptions:
   def __dealloc__(self):
     del self.options
 
+
 # Regression
 # -----------------------------------------------------------------------------
 cdef class _RegressionTrain:
@@ -117,7 +108,6 @@ cdef class _RegressionTrain:
 
 cdef class RegressionForest:
 
-  # cdef string serialized
   cdef bytes serialized
 
   def __cinit__(self, X, y, sample_fraction=0.5, mtry=None, num_trees=2000, num_threads=None,
