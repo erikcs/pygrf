@@ -27,6 +27,8 @@ _Data()
 * memoryviews:
 
   https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/linear_model/cd_fast.pyx#L105
+
+  wont compile with fused types
 * input check
 * .sort() ?
 

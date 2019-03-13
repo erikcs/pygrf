@@ -4,7 +4,6 @@ from cython.operator cimport dereference as deref
 
 from grfheaders cimport *
 
-
 # Utils
 # -----------------------------------------------------------------------------
 cdef class _Serialize:
@@ -36,13 +35,13 @@ cdef class _Data:
 
   cdef Data* data
 
-  def __cinit__(self, np.ndarray X, np.ndarray y):
+  def __cinit__(self, double[:, ::1] X, double[::1] y):
     cdef uint n = X.shape[0]
     cdef uint p = X.shape[1]
     assert len(y) == n
-    cdef np.ndarray Xy = np.asfortranarray( np.c_[X, y] )
+    cdef double[::1, :] Xy = np.asfortranarray(np.c_[X, y])
 
-    self.data = new DefaultData(<double*> Xy.data, n, p + 1)
+    self.data = new DefaultData(&Xy[0, 0], n, p + 1)
     self.data.set_outcome_index(p)
     self.data.sort() # ?
 
