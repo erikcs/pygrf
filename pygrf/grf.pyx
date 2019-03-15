@@ -3,6 +3,7 @@ cimport numpy as np
 from cython.operator cimport dereference as deref
 
 from grfheaders cimport *
+cdef int SMAX = 2147483647
 
 # Utils
 # -----------------------------------------------------------------------------
@@ -54,19 +55,20 @@ cdef class _ForestOptions:
   cdef ForestOptions* options
 
   def __cinit__(self,
-    uint num_trees,
-    size_t ci_group_size,
-    double sample_fraction,
-    uint mtry,
-    uint min_node_size,
-    bool honesty,
-    double honesty_fraction,
-    double alpha,
-    double imbalance_penalty,
-    uint num_threads,
-    uint random_seed,
-    np.ndarray[dtype=np.intp_t, ndim=1] sample_clusters,
-    uint sample_per_cluster):
+    uint num_trees=2000,
+    size_t ci_group_size=2,
+    double sample_fraction=0.5,
+    mtry=None, # default ...
+    uint min_node_size=5,
+    bool honesty=True,
+    double honesty_fraction=0.5,
+    double alpha=0.05,
+    double imbalance_penalty=0,
+    uint num_threads=0,
+    uint random_seed=np.random.randint(0, SMAX, 1)[0],
+    np.ndarray[dtype=np.intp_t, ndim=1] sample_clusters=np.empty(0, dtype=int),
+    # sample_clusters=0,
+    uint sample_per_cluster=0):
 
     self.options = new ForestOptions(
      ForestOptions(<uint> num_trees,

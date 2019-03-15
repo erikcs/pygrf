@@ -5,6 +5,7 @@ from libcpp.string cimport string
 
 ctypedef unsigned int uint
 
+
 # Misc. lib std
 cdef extern from '<iostream>' namespace 'std':
   cdef cppclass ostream:
