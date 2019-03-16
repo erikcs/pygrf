@@ -7,6 +7,8 @@ cdef int SMAX = 2147483647
 
 # Utils
 # -----------------------------------------------------------------------------
+
+# Going from C++ to Python
 cdef class _Serializer:
 
   cdef ForestSerializer* serializer
@@ -14,23 +16,28 @@ cdef class _Serializer:
   def __cinit__(self):
     self.serializer = new ForestSerializer()
 
-  # Going from C++ to Python
   cdef string serialize(self, const Forest& forest):
     cdef stringstream stream
-    cdef string contents
-
     self.serializer.serialize(stream, forest)
-    contents = stream.str()
 
-    return contents
-
-  # Going from Python to C++
-  def deserialize(self):
-    pass
+    return stream.str()
 
   def __dealloc__(self):
     del self.serializer
 
+# Going from Python to C++
+cdef class _DeSerialiser:
+
+  cdef Forest* forest
+
+  cdef deserialize(self, string serialized):
+    cdef stringstream stream
+    stream.str(serialized)
+    s = _Serializer()
+    self.forest = new Forest(s.serializer.deserialize(stream))
+
+  def __dealloc__(self):
+    del self.forest
 
 cdef class _Data:
 
@@ -108,7 +115,7 @@ cdef class _RegressionTrainer:
   def __cinit__(self):
     self.trainer = new ForestTrainer(ForestTrainers.regression_trainer())
 
-  cdef train(self, Data* data, ForestOptions options):
+  cdef train(self, Data* data, const ForestOptions& options):
     self.forest = new Forest(self.trainer.train(data, options))
 
   def __dealloc__(self):
@@ -118,7 +125,7 @@ cdef class _RegressionTrainer:
 
 cdef class RegressionForest:
 
-  cdef bytes serialized
+  cdef string serialized
 
   cdef double sample_fraction
   cdef int mtry
@@ -137,7 +144,8 @@ cdef class RegressionForest:
   cdef uint num_fit_reps
   cdef uint num_optimize_reps
 
-  # TOTUNE: min_node_size, sample_fraction, mtry, imbalance_penalty
+  cdef _Data data
+
   def __cinit__(self,
     sample_fraction=0.5,
     mtry=-1,
@@ -182,11 +190,9 @@ cdef class RegressionForest:
     uint samples_per_cluster=0):
 
     d = _Data(X, y)
-    _tune_regression_forest(self)
-
     if self.mtry < 0:
       self.mtry = min(np.ceil(np.sqrt(d.p)) + 20, d.p)
-
+    self._tune_regression_forest()
     trainer = _RegressionTrainer()
     options = _ForestOptions(self.num_trees, self.ci_group_size,
                     self.sample_fraction,self.mtry, self.min_node_size,
@@ -198,10 +204,15 @@ cdef class RegressionForest:
     trainer.train(d.data, deref(options.options))
     self.serialized = s.serialize(deref(trainer.forest))
 
+    return self
+
   def _fit(self):
     pass
 
+  # TOTUNE: min_node_size, sample_fraction, mtry, alpha, imbalance_penalty
   def _tune_regression_forest(self):
+    # if self.mtry < 0:
+    #   self.mtry = min(np.ceil(np.sqrt(d.p)) + 20, d.p)
     if self.tune_parameters:
       pass
 

@@ -22,6 +22,12 @@ Misc
 
 * stringstream(ostream) ?
 
+* typing, const correctness
+
+* clusters convert to C++ vector
+
+* std::string return stack?
+
 _Data()
 * sparse, rowMajor
 * memoryviews:
@@ -34,3 +40,9 @@ _Data()
 
 _ForestOptions()
 * input check (R NULL vs python?)
+
+_Serialize()
+* std::strings passed by copy?
+
+grf
+* min node size hiccup / o.l.

@@ -9,11 +9,19 @@ ctypedef unsigned int uint
 # Misc. lib std
 cdef extern from '<iostream>' namespace 'std':
   cdef cppclass ostream:
-    ostream& write(const char*, int)
+    pass
+    # ostream(ostream&);
+    # ostream& write(const char*, int);
+  cdef cppclass istream:
+    # istream(istream&)
+    pass
 
 cdef extern from '<sstream>' namespace 'std':
-  cdef cppclass stringstream(ostream):
+  cdef cppclass stringstream(ostream, istream):
+    # stringstream(stringstream&);
     string str();
+    istream str(string);
+    # stringstream stringstream(string);
 
 # Data()
 cdef extern from 'grf/core/src/commons/Data.h':
@@ -64,6 +72,7 @@ cdef extern from 'grf/core/src/tree/Tree.cpp':
 cdef extern from 'grf/core/src/serialization/ForestSerializer.h':
   cdef cppclass ForestSerializer:
     void serialize(ostream& stream, const Forest& forest);
+    Forest deserialize(istream& stream);
 
 cdef extern from 'grf/core/src/serialization/ForestSerializer.cpp':
   pass
