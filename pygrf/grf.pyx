@@ -1,3 +1,4 @@
+import cython
 import numpy as np
 cimport numpy as np
 from cython.operator cimport dereference as deref
@@ -45,18 +46,25 @@ cdef class _Data:
   cdef uint n
   cdef uint p
 
-  def __cinit__(self, double[:, ::1] X, double[::1] y):
+  def __cinit__(self, double[:, ::1] X, double[::1] y=None):
     cdef uint n = X.shape[0]
     cdef uint p = X.shape[1]
-    assert len(y) == n
-    cdef double[::1, :] Xy = np.asfortranarray(np.c_[X, y])
+    cdef uint ncols
+    cdef double[::1, :] data
 
+    if y is not None:
+      assert len(y) == n
+      data = np.asfortranarray(np.c_[X, y])
+      ncols = p + 1
+    else:
+      data = np.asfortranarray(X)
+      ncols = p
+
+    self.data = new DefaultData(&data[0, 0], n, ncols)
+    if y is not None:
+      self.data.set_outcome_index(p)
     self.n = n
     self.p = p
-
-    self.data = new DefaultData(&Xy[0, 0], n, p + 1)
-    self.data.set_outcome_index(p)
-    self.data.sort()
 
   def __dealloc__(self):
       del self.data
@@ -85,7 +93,6 @@ cdef class _ForestOptions:
     assert 0 <= sample_fraction <= 1
     assert imbalance_penalty >= 0
 
-
     self.options = new ForestOptions(
      ForestOptions(<uint> num_trees,
                   <size_t> ci_group_size,
@@ -109,8 +116,8 @@ cdef class _ForestOptions:
 # -----------------------------------------------------------------------------
 cdef class _RegressionTrainer:
 
-  cdef const ForestTrainer* trainer
-  cdef const Forest* forest
+  cdef ForestTrainer* trainer
+  cdef Forest* forest
 
   def __cinit__(self):
     self.trainer = new ForestTrainer(ForestTrainers.regression_trainer())
@@ -121,6 +128,32 @@ cdef class _RegressionTrainer:
   def __dealloc__(self):
     del self.trainer
     del self.forest
+
+@cython.internal
+cdef class _RegressionPredictor:
+
+  cdef ForestPredictor* predictor
+  cdef vector[Prediction]* predictions
+
+  def __cinit__(self, uint num_threads):
+    self.predictor = new ForestPredictor(
+      ForestPredictors.regression_predictor(num_threads))
+
+  cdef predict(self, Data* train_data, Data* data, const Forest& forest, bool estimate_variance):
+    self.predictions = new vector[Prediction](self.predictor.predict(forest, train_data, data,
+                                              estimate_variance))
+
+  def predict_oob(self):
+    pass
+
+  @property
+  def predictions(self):
+    cdef double[:, ::1] X
+    return X
+
+  def __dealloc__(self):
+    del self.predictor
+    del self.predictions
 
 
 cdef class RegressionForest:
@@ -201,8 +234,10 @@ cdef class RegressionForest:
                     self.seed, clusters, samples_per_cluster)
     s = _Serializer()
     d = _Data(X, y)
+    d.data.sort()
     trainer.train(d.data, deref(options.options))
     self.serialized = s.serialize(deref(trainer.forest))
+    self.data = d
 
     return self
 
@@ -215,6 +250,15 @@ cdef class RegressionForest:
     #   self.mtry = min(np.ceil(np.sqrt(d.p)) + 20, d.p)
     if self.tune_parameters:
       pass
+
+  def predict(self, data, num_threads, estimate_variance):
+    rp = _RegressionPredictor(num_threads)
+    d = _Data(data)
+    ds = _DeSerialiser(self.serialized)
+    rp.predict(self.data.data, d.data, deref(ds.forest), estimate_variance)
+
+
+
 
   def blabla(self):
     return self.serialized

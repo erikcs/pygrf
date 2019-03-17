@@ -113,6 +113,31 @@ cdef extern from 'grf/core/src/forest/ForestTrainers.h':
 cdef extern from 'grf/core/src/forest/ForestTrainers.cpp':
   pass
 
+# ForestPredictor()
+cdef extern from 'grf/core/src/forest/ForestPredictor.h':
+  cdef cppclass ForestPredictor:
+    ForestPredictor(ForestPredictor&)
+    vector[Prediction] predict(const Forest& forest,
+                               Data* train_data,
+                               Data*,
+                               bool estimate_variance) const;
+
+cdef extern from 'grf/core/src/forest/ForestPredictor.cpp':
+  pass
+
+# ForestPredictors()
+cdef extern from 'grf/core/src/forest/ForestPredictors.h':
+  cdef cppclass ForestPredictors:
+    @staticmethod
+    ForestPredictor regression_predictor(uint num_threads);
+    @staticmethod
+    ForestPredictor local_linear_predictor(
+              uint num_threads, vector[double] lambdas, bool weighted_penalty,
+              vector[size_t] linear_correction_variables);
+
+cdef extern from 'grf/core/src/forest/ForestPredictors.cpp':
+  pass
+
 # RelabelingStrategy()
 cdef extern from 'grf/core/src/relabeling/RelabelingStrategy.h':
   cdef cppclass RelabelingStrategy:
@@ -127,3 +152,51 @@ cdef extern from 'grf/core/src/splitting/factory/SplittingRuleFactory.h':
 cdef extern from 'grf/core/src/prediction/OptimizedPredictionStrategy.h':
   cdef cppclass OptimizedPredictionStrategy:
     pass
+
+# CustomPredictionStrategy()
+cdef extern from 'grf/core/src/prediction/CustomPredictionStrategy.h':
+  cdef cppclass CustomPredictionStrategy:
+    pass
+
+cdef extern from 'grf/core/src/prediction/CustomPredictionStrategy.cpp':
+  pass
+
+# DefaultPredictionCollectory()
+cdef extern from 'grf/core/src/prediction/collector/DefaultPredictionCollector.h':
+  cdef cppclass DefaultPredictionCollector:
+    pass
+
+cdef extern from 'grf/core/src/prediction/collector/DefaultPredictionCollector.cpp':
+  pass
+
+# OptimizedPredictionCollectory()
+cdef extern from 'grf/core/src/prediction/collector/OptimizedPredictionCollector.h':
+  cdef cppclass OptimizedPredictionCollector:
+    pass
+
+cdef extern from 'grf/core/src/prediction/collector/OptimizedPredictionCollector.cpp':
+  pass
+
+# QuantilePredictionStrategy()
+cdef extern from 'grf/core/src/prediction/QuantilePredictionStrategy.h':
+  cdef cppclass QuantilePredictionStrategy:
+    pass
+
+cdef extern from 'grf/core/src/prediction/QuantilePredictionStrategy.cpp':
+  pass
+
+# LocalLinearPredictionStrategy()
+cdef extern from 'grf/core/src/prediction/LocalLinearPredictionStrategy.h':
+  cdef cppclass LocalLinearPredictionStrategy:
+    pass
+
+cdef extern from 'grf/core/src/prediction/LocalLinearPredictionStrategy.cpp':
+  pass
+
+# Prediction()
+cdef extern from 'grf/core/src/prediction/Prediction.h':
+  cdef cppclass Prediction:
+    pass
+
+cdef extern from 'grf/core/src/prediction/Prediction.cpp':
+  pass

@@ -28,6 +28,10 @@ Misc
 
 * std::string return stack?
 
+* move sources to cdef
+
+* https://groups.google.com/forum/#!topic/cython-users/nXsytgkTbGg
+
 _Data()
 * sparse, rowMajor
 * memoryviews:
