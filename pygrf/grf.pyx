@@ -45,22 +45,24 @@ cdef class _Data:
   cdef Data* data
   cdef uint n
   cdef uint p
+  cdef double[::1, :] fdata
 
-  def __cinit__(self, double[:, ::1] X, double[::1] y=None):
+  # def __cinit__(self, double[:, ::1] X, double[::1] y=None):
+  def __cinit__(self, double[::1, :] X, double[::1] y=None):
     cdef uint n = X.shape[0]
     cdef uint p = X.shape[1]
     cdef uint ncols
-    cdef double[::1, :] data
+    # cdef double[::1, :] data
 
     if y is not None:
       assert len(y) == n
-      data = np.asfortranarray(np.c_[X, y])
+      self.fdata = np.asfortranarray(np.c_[X, y])
       ncols = p + 1
     else:
-      data = np.asfortranarray(X)
+      self.fdata = np.asfortranarray(X)
       ncols = p
 
-    self.data = new DefaultData(&data[0, 0], n, ncols)
+    self.data = new DefaultData(&self.fdata[0, 0], n, ncols)
     if y is not None:
       self.data.set_outcome_index(p)
     self.n = n
@@ -158,7 +160,8 @@ cdef class _RegressionPredictor:
 
 cdef class RegressionForest:
 
-  cdef string serialized
+  # cdef string serialized
+  cdef bytes serialized
 
   cdef double sample_fraction
   cdef int mtry
@@ -191,7 +194,8 @@ cdef class RegressionForest:
     alpha=0.05,
     imbalance_penalty=0,
     compute_oob_predictions=True,
-    seed=np.random.randint(0, SMAX, 1)[0],
+    # seed=np.random.randint(0, SMAX, 1)[0],
+    seed=1,
     clusters=np.empty(0, dtype=int),
     samples_per_cluster=0,
     tune_parameters=False,
@@ -217,12 +221,13 @@ cdef class RegressionForest:
     self.num_optimize_reps = num_optimize_reps
 
   def fit(self,
-    double[:, ::1] X,
+    # double[:, ::1] X,
+    double[::1, :] X,
     double[::1] y,
     np.ndarray[dtype=np.intp_t, ndim=1] clusters=np.empty(0, dtype=int),
     uint samples_per_cluster=0):
 
-    d = _Data(X, y)
+    d = _Data(X, y) # cdef her
     if self.mtry < 0:
       self.mtry = min(np.ceil(np.sqrt(d.p)) + 20, d.p)
     self._tune_regression_forest()
@@ -239,6 +244,17 @@ cdef class RegressionForest:
     self.serialized = s.serialize(deref(trainer.forest))
     self.data = d
 
+    dX = _Data(X)
+
+    # rp = _RegressionPredictor(0)
+    # rp.predict(self.data.data, dX.data, deref(trainer.forest), False)
+
+    # ds = _DeSerialiser(self.serialized)
+    ds = _DeSerialiser(self.serialized)
+
+    self.serialized = s.serialize(deref(ds.forest))
+    # rp.predict(self.data.data, dX.data, deref(ds.forest), False)
+
     return self
 
   def _fit(self):
@@ -251,14 +267,11 @@ cdef class RegressionForest:
     if self.tune_parameters:
       pass
 
-  def predict(self, data, num_threads, estimate_variance):
-    rp = _RegressionPredictor(num_threads)
+  def predict(self, double[::1, :] data, num_threads, estimate_variance):
+    rp = _RegressionPredictor(0)
     d = _Data(data)
     ds = _DeSerialiser(self.serialized)
-    rp.predict(self.data.data, d.data, deref(ds.forest), estimate_variance)
-
-
-
+    rp.predict(self.data.data, d.data, deref(ds.forest), False)
 
   def blabla(self):
     return self.serialized

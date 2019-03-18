@@ -32,6 +32,10 @@ Misc
 
 * https://groups.google.com/forum/#!topic/cython-users/nXsytgkTbGg
 
+* scope and object lifetimes
+
+* c++ exceptions
+
 _Data()
 * sparse, rowMajor
 * memoryviews:
