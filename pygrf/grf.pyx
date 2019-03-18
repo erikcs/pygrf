@@ -31,6 +31,9 @@ cdef class _DeSerialiser:
 
   cdef Forest* forest
 
+  def __cinit__(self):
+    pass
+
   cdef deserialize(self, string serialized):
     cdef stringstream stream
     stream.str(serialized)
@@ -160,8 +163,8 @@ cdef class _RegressionPredictor:
 
 cdef class RegressionForest:
 
-  # cdef string serialized
-  cdef bytes serialized
+  cdef string serialized
+  # cdef bytes serialized
 
   cdef double sample_fraction
   cdef int mtry
@@ -246,14 +249,16 @@ cdef class RegressionForest:
 
     dX = _Data(X)
 
-    # rp = _RegressionPredictor(0)
+    rp = _RegressionPredictor(0)
     # rp.predict(self.data.data, dX.data, deref(trainer.forest), False)
 
     # ds = _DeSerialiser(self.serialized)
-    ds = _DeSerialiser(self.serialized)
+    # ds = _DeSerialiser(self.serialized)
+    ds = _DeSerialiser()
+    ds.deserialize(self.serialized)
 
-    self.serialized = s.serialize(deref(ds.forest))
-    # rp.predict(self.data.data, dX.data, deref(ds.forest), False)
+    # self.serialized = s.serialize(deref(ds.forest))
+    rp.predict(self.data.data, dX.data, deref(ds.forest), False)
 
     return self
 
