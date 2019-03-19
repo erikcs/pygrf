@@ -157,30 +157,25 @@ cdef class _RegressionPredictor:
     self.predictions = new vector[Prediction](
       self.predictor.predict(forest, train_data, data, estimate_variance))
 
-  cdef predict_oob(self, Data* train_data, Data* data, const Forest& forest,
+    return self._create_predictions()
+
+  cdef predict_oob(self, Data* train_data, const Forest& forest,
                    bool estimate_variance=False):
     self.predictions = new vector[Prediction](
        self.predictor.predict_oob(forest, train_data, estimate_variance))
 
+    return self._create_predictions()
 
-  def bla(self):
-   cdef size_t prediction_length = self.predictions.at(0).size()
-   cdef size_t N = self.predictions.size()
-   cdef double[::1, :] X = np.empty((N, prediction_length))
-   cdef vector[double]* pred
+  def _create_predictions(self):
+    cdef size_t pred_length = self.predictions.at(0).size()
+    cdef size_t N = self.predictions.size()
+    cdef np.ndarray[np.double_t, ndim=2] X = np.empty((N, pred_length), dtype=np.double)
+    # cdef double[::1, :] X = np.empty((N, pred_length))
 
-   for i in range(N):
-     for j in range(prediction_length):
-       X[i, j] =  self.predictions.at(i).get_predictions().at(j)
+    for i in range(N):
+      for j in range(pred_length):
+        X[i, j] = self.predictions.at(i).get_predictions().at(j)
 
-   return X
-
-  def predict_oob(self):
-    pass
-
-  @property
-  def predictions(self):
-    cdef double[:, ::1] X
     return X
 
   def __dealloc__(self):
@@ -276,23 +271,26 @@ cdef class RegressionForest:
 
     return self
 
-  def _fit(self):
-    pass
-
   # ToTune min_node_size, sample_fraction, mtry, alpha, imbalance_penalty
   def _tune_regression_forest(self):
     if self.tune_parameters:
       pass
 
-  def predict(self, double[::1, :] data=None, uint num_threads=0, bool estimate_variance=False):
-    rp = _RegressionPredictor(0)
+  def predict(self, double[::1, :] data=None, uint num_threads=0,
+              bool estimate_variance=False):
+
+    rp = _RegressionPredictor(num_threads)
+
+    if data is None:
+      ret = rp.predict_oob(self.traindata.data, deref(self.trainer.forest),
+                           estimate_variance)
+      return ret
+
     d = _Data(data)
-    # ds = _DeSerialiser(self.serialized)
-    # rp.predict(self._data.data, d.data, deref(ds.forest), False)
-    rp.predict(self.traindata.data, d.data, deref(self.trainer.forest), False)
+    ret = rp.predict(self.traindata.data, d.data, deref(self.trainer.forest),
+                     estimate_variance)
 
-    return rp.bla()
-
+    return ret
 
 
 # Quantile
