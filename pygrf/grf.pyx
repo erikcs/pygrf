@@ -9,7 +9,8 @@ cdef int SMAX = 2147483647
 # Utils
 # -----------------------------------------------------------------------------
 
-# Going from C++ to Python
+# Going from C++ to Python: Unused
+@cython.internal
 cdef class _Serializer:
 
   cdef ForestSerializer* serializer
@@ -26,7 +27,9 @@ cdef class _Serializer:
   def __dealloc__(self):
     del self.serializer
 
-# Going from Python to C++
+
+# Going from Python to C++: Unused
+@cython.internal
 cdef class _DeSerialiser:
 
   cdef Forest* forest
@@ -43,6 +46,7 @@ cdef class _DeSerialiser:
   def __dealloc__(self):
     del self.forest
 
+@cython.internal
 cdef class _Data:
 
   cdef Data* data
@@ -50,24 +54,23 @@ cdef class _Data:
   cdef uint p
   cdef double[::1, :] fdata
 
-  # def __cinit__(self, double[:, ::1] X, double[::1] y=None):
   def __cinit__(self, double[::1, :] X, double[::1] y=None):
     cdef uint n = X.shape[0]
     cdef uint p = X.shape[1]
     cdef uint ncols
-    # cdef double[::1, :] data
 
     if y is not None:
       assert len(y) == n
       self.fdata = np.asfortranarray(np.c_[X, y])
       ncols = p + 1
-    else:
-      self.fdata = np.asfortranarray(X)
-      ncols = p
-
-    self.data = new DefaultData(&self.fdata[0, 0], n, ncols)
-    if y is not None:
+      self.data = new DefaultData(&self.fdata[0, 0], n, ncols)
       self.data.set_outcome_index(p)
+      self.data.sort()
+    else:
+      self.fdata = np.asfortranarray(X) #TODO: doesn't have to be copied
+      ncols = p
+      self.data = new DefaultData(&self.fdata[0, 0], n, ncols)
+
     self.n = n
     self.p = p
 
@@ -75,6 +78,7 @@ cdef class _Data:
       del self.data
 
 
+@cython.internal
 cdef class _ForestOptions:
 
   cdef ForestOptions* options
@@ -119,6 +123,7 @@ cdef class _ForestOptions:
 
 # Regression
 # -----------------------------------------------------------------------------
+@cython.internal
 cdef class _RegressionTrainer:
 
   cdef ForestTrainer* trainer
@@ -134,6 +139,7 @@ cdef class _RegressionTrainer:
     del self.trainer
     del self.forest
 
+
 @cython.internal
 cdef class _RegressionPredictor:
 
@@ -147,6 +153,28 @@ cdef class _RegressionPredictor:
   cdef predict(self, Data* train_data, Data* data, const Forest& forest, bool estimate_variance):
     self.predictions = new vector[Prediction](self.predictor.predict(forest, train_data, data,
                                               estimate_variance))
+
+  def bla(self):
+    cdef size_t prediction_length = self.predictions.at(0).size()
+    cdef size_t N = self.predictions.size()
+    cdef double[::1, :] X = np.empty((N, prediction_length))
+    # cdef const vector[double]& pred
+    cdef vector[double]* pred
+
+    # print( prediction_length )
+
+
+    # print( self.predictions.at(1).get_predictions().size() )
+    # print(prediction_length, N)
+    # self.predictions[1].get_predictions()
+    # pred[0] = self.predictions.at(1).get_predictions() # https://stackoverflow.com/questions/43219293/c-method-demands-reference-cant-get-cython-to-provide-one
+    # pred[0] = self.predictions.at(0).get_predictions()
+    for i in range(N):
+      # pred[0] = self.predictions.at(i).get_predictions()
+      # print(pred[0].size())
+      for j in range(prediction_length):
+        print( self.predictions.at(i).get_predictions().at(j) )
+
 
   def predict_oob(self):
     pass
@@ -163,8 +191,9 @@ cdef class _RegressionPredictor:
 
 cdef class RegressionForest:
 
-  cdef string serialized
+  # cdef string serialized
   # cdef bytes serialized
+  # cdef Forest* forest
 
   cdef double sample_fraction
   cdef int mtry
@@ -183,7 +212,10 @@ cdef class RegressionForest:
   cdef uint num_fit_reps
   cdef uint num_optimize_reps
 
-  cdef _Data data
+  # lost pointers...
+  cdef _Data _data
+  cdef _RegressionTrainer trainer
+  cdef _ForestOptions options
 
   def __cinit__(self,
     sample_fraction=0.5,
@@ -230,35 +262,21 @@ cdef class RegressionForest:
     np.ndarray[dtype=np.intp_t, ndim=1] clusters=np.empty(0, dtype=int),
     uint samples_per_cluster=0):
 
-    d = _Data(X, y) # cdef her
+    # cdef _Data d = _Data(X, y)
+    self._data = _Data(X, y)
+
     if self.mtry < 0:
-      self.mtry = min(np.ceil(np.sqrt(d.p)) + 20, d.p)
+      self.mtry = min(np.ceil(np.sqrt(self._data.p)) + 20, self._data.p)
     self._tune_regression_forest()
-    trainer = _RegressionTrainer()
-    options = _ForestOptions(self.num_trees, self.ci_group_size,
+    self.trainer = _RegressionTrainer()
+    self.options = _ForestOptions(self.num_trees, self.ci_group_size,
                     self.sample_fraction,self.mtry, self.min_node_size,
                     self.honesty, self.honesty_fraction, self.alpha,
                     self.imbalance_penalty, self.num_threads,
                     self.seed, clusters, samples_per_cluster)
-    s = _Serializer()
-    d = _Data(X, y)
-    d.data.sort()
-    trainer.train(d.data, deref(options.options))
-    self.serialized = s.serialize(deref(trainer.forest))
-    self.data = d
 
-    dX = _Data(X)
-
-    rp = _RegressionPredictor(0)
-    # rp.predict(self.data.data, dX.data, deref(trainer.forest), False)
-
-    # ds = _DeSerialiser(self.serialized)
-    # ds = _DeSerialiser(self.serialized)
-    ds = _DeSerialiser()
-    ds.deserialize(self.serialized)
-
-    # self.serialized = s.serialize(deref(ds.forest))
-    rp.predict(self.data.data, dX.data, deref(ds.forest), False)
+    self.trainer.train(self._data.data, deref(self.options.options))
+    # self.forest = trainer.forest
 
     return self
 
@@ -267,19 +285,23 @@ cdef class RegressionForest:
 
   # TOTUNE: min_node_size, sample_fraction, mtry, alpha, imbalance_penalty
   def _tune_regression_forest(self):
-    # if self.mtry < 0:
-    #   self.mtry = min(np.ceil(np.sqrt(d.p)) + 20, d.p)
     if self.tune_parameters:
       pass
 
   def predict(self, double[::1, :] data, num_threads, estimate_variance):
     rp = _RegressionPredictor(0)
     d = _Data(data)
-    ds = _DeSerialiser(self.serialized)
-    rp.predict(self.data.data, d.data, deref(ds.forest), False)
+    # ds = _DeSerialiser(self.serialized)
+    # rp.predict(self._data.data, d.data, deref(ds.forest), False)
+    rp.predict(self._data.data, d.data, deref(self.trainer.forest), False)
 
-  def blabla(self):
-    return self.serialized
+    rp.bla()
+
+
+  def __dealloc__(self):
+    pass
+    # del self.forest
+
 
 
 # Quantile
