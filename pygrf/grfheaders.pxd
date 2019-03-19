@@ -196,7 +196,8 @@ cdef extern from 'grf/core/src/prediction/LocalLinearPredictionStrategy.cpp':
 # Prediction()
 cdef extern from 'grf/core/src/prediction/Prediction.h':
   cdef cppclass Prediction:
-    pass
+    const size_t size() const;
+    const vector[double]& get_predictions() const;
 
 cdef extern from 'grf/core/src/prediction/Prediction.cpp':
   pass
