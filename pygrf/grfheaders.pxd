@@ -198,6 +198,10 @@ cdef extern from 'grf/core/src/prediction/Prediction.h':
   cdef cppclass Prediction:
     const size_t size() const;
     const vector[double]& get_predictions() const;
+    const vector[double]& get_variance_estimates() const;
+    const vector[double]& get_error_estimates() const;
+    const bool contains_variance_estimates() const;
+    const bool contains_error_estimates() const;
 
 cdef extern from 'grf/core/src/prediction/Prediction.cpp':
   pass
