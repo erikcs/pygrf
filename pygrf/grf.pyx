@@ -148,27 +148,32 @@ cdef class _RegressionPredictor:
   cdef ForestPredictor* predictor
   cdef vector[Prediction]* predictions
 
-  def __cinit__(self, uint num_threads=0):
-    self.predictor = new ForestPredictor(
-      ForestPredictors.regression_predictor(num_threads))
+  def __cinit__(self, kind, uint num_threads=0):
+      self.predictor = new ForestPredictor(
+        ForestPredictors.regression_predictor(num_threads))
 
   cdef predict(self, Data* train_data, Data* data, const Forest& forest,
                bool estimate_variance=False):
     self.predictions = new vector[Prediction](
       self.predictor.predict(forest, train_data, data, estimate_variance))
 
+  cdef predict_oob(self, Data* train_data, Data* data, const Forest& forest,
+                   bool estimate_variance=False):
+    self.predictions = new vector[Prediction](
+       self.predictor.predict_oob(forest, train_data, estimate_variance))
+
+
   def bla(self):
-    cdef size_t prediction_length = self.predictions.at(0).size()
-    cdef size_t N = self.predictions.size()
-    cdef double[::1, :] X = np.empty((N, prediction_length))
-    cdef vector[double]* pred
+   cdef size_t prediction_length = self.predictions.at(0).size()
+   cdef size_t N = self.predictions.size()
+   cdef double[::1, :] X = np.empty((N, prediction_length))
+   cdef vector[double]* pred
 
-    for i in range(N):
-      for j in range(prediction_length):
-        X[i, j] =  self.predictions.at(i).get_predictions().at(j)
+   for i in range(N):
+     for j in range(prediction_length):
+       X[i, j] =  self.predictions.at(i).get_predictions().at(j)
 
-    return X
-
+   return X
 
   def predict_oob(self):
     pass
@@ -181,6 +186,11 @@ cdef class _RegressionPredictor:
   def __dealloc__(self):
     del self.predictor
     del self.predictions
+
+
+@cython.internal
+cdef class _LocLinearRegressionPredictor:
+  pass
 
 
 cdef class RegressionForest:
@@ -274,7 +284,7 @@ cdef class RegressionForest:
     if self.tune_parameters:
       pass
 
-  cdef predict(self, double[::1, :] data=None, uint num_threads=0, bool estimate_variance=False):
+  def predict(self, double[::1, :] data=None, uint num_threads=0, bool estimate_variance=False):
     rp = _RegressionPredictor(0)
     d = _Data(data)
     # ds = _DeSerialiser(self.serialized)

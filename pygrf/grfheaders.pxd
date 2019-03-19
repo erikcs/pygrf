@@ -121,6 +121,9 @@ cdef extern from 'grf/core/src/forest/ForestPredictor.h':
                                Data* train_data,
                                Data*,
                                bool estimate_variance) const;
+    vector[Prediction] predict_oob(const Forest& forest,
+                              Data* train_data,
+                              bool estimate_variance) const;
 
 cdef extern from 'grf/core/src/forest/ForestPredictor.cpp':
   pass
