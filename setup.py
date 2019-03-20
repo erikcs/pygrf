@@ -1,12 +1,18 @@
 import numpy
 import os
+import sys
 
-from distutils.core import setup, Extension
+from setuptools import setup
+from distutils.core import Extension
 from Cython.Build import cythonize
 
 
-COMPILE_ARGS = ['-std=c++11', '-stdlib=libc++', '-Wall', '-O2', '-pthread']
-LINK_ARGS = ['-stdlib=libc++']
+if sys.platform == 'darwin': # Mac
+    COMPILE_ARGS = ['-std=c++11', '-stdlib=libc++', '-Wall', '-O2', '-pthread']
+    LINK_ARGS = ['-stdlib=libc++']
+else: # Linux
+    COMPILE_ARGS = ['-std=c++11', '-lstdc++', '-Wall', '-O2', '-pthread']
+    LINK_ARGS = ['-lstdc++', '-pthread']
 
 setup_dir = os.path.abspath(os.path.dirname(__file__))
 INCLUDE_DIRS = [os.path.join(setup_dir, 'pygrf/grf/core/src')]
@@ -52,5 +58,6 @@ ext = Extension(
 
 setup(
     name='pygrf',
+    version='0.0.1',
     ext_modules=cythonize(ext)
 )

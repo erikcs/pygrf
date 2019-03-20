@@ -1,0 +1,9 @@
+name: pygrf
+channels:
+  - defaults
+dependencies:
+  - cython
+  - numpy
+  - python>=3
+
+  - pytest

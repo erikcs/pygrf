@@ -10,18 +10,13 @@ ctypedef unsigned int uint
 cdef extern from '<iostream>' namespace 'std':
   cdef cppclass ostream:
     pass
-    # ostream(ostream&);
-    # ostream& write(const char*, int);
   cdef cppclass istream:
-    # istream(istream&)
     pass
 
 cdef extern from '<sstream>' namespace 'std':
   cdef cppclass stringstream(ostream, istream):
-    # stringstream(stringstream&);
     string str();
     istream str(string);
-    # stringstream stringstream(string);
 
 # Data()
 cdef extern from 'grf/core/src/commons/Data.h':
