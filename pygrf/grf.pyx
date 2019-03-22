@@ -3,7 +3,7 @@ import numpy as np
 cimport numpy as np
 from cython.operator cimport dereference as deref
 
-from grfheaders cimport *
+from pygrf.grfheaders cimport *
 cdef int SMAX = 2147483647
 
 # Utils

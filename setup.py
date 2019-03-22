@@ -59,5 +59,5 @@ ext = Extension(
 setup(
     name='pygrf',
     version='0.0.1',
-    ext_modules=cythonize(ext)
+    ext_modules=cythonize(ext, compiler_directives={'language_level' : 3})
 )

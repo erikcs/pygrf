@@ -2,12 +2,6 @@
 Misc
 * test vs R
 
-* compile/load test
-
-* travis compile
-
-* OSX/clang specific compile args
-
 * add except + to constructors
 
 * `@boundscheck` and `@wraparound`
@@ -19,8 +13,6 @@ Misc
 * cdef pass
 
 * (cython several .pyx)
-
-* stringstream(ostream) ?
 
 * typing, const correctness
 
@@ -35,6 +27,8 @@ Misc
 * scope and object lifetimes
 
 * c++ exceptions
+
+* latest working grf: f44627fb7f31e7bc04e7efe453a8db0100735b81
 
 _Data()
 * sparse, rowMajor
