@@ -100,6 +100,7 @@ cdef extern from 'grf/core/src/forest/ForestTrainer.h':
 cdef extern from 'grf/core/src/forest/ForestTrainer.cpp':
   pass
 
+
 # ForestTrainers()
 cdef extern from 'grf/core/src/forest/ForestTrainers.h':
   cdef cppclass ForestTrainers:
