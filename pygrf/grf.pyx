@@ -9,7 +9,7 @@ cdef int SMAX = 2147483647
 # Utils
 # -----------------------------------------------------------------------------
 
-# (Unused) Going from C++ to Python
+# Going from C++ to Python (unused)
 @cython.internal
 cdef class _Serializer:
 
@@ -28,7 +28,7 @@ cdef class _Serializer:
     del self.serializer
 
 
-# (Unused) Going from Python to C++
+# Going from Python to C++ (unused)
 @cython.internal
 cdef class _DeSerialiser:
 

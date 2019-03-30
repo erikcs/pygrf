@@ -13,10 +13,12 @@ cdef extern from '<iostream>' namespace 'std':
   cdef cppclass istream:
     pass
 
+
 cdef extern from '<sstream>' namespace 'std':
   cdef cppclass stringstream(ostream, istream):
     string str();
     istream str(string);
+
 
 # Data()
 cdef extern from 'grf/core/src/commons/Data.h':
@@ -28,6 +30,7 @@ cdef extern from 'grf/core/src/commons/Data.h':
 cdef extern from 'grf/core/src/commons/Data.cpp':
   pass
 
+
 # DefaultData()
 cdef extern from 'grf/core/src/commons/DefaultData.h':
   cdef cppclass DefaultData(Data):
@@ -36,13 +39,15 @@ cdef extern from 'grf/core/src/commons/DefaultData.h':
 cdef extern from 'grf/core/src/commons/DefaultData.cpp':
   pass
 
-# # SparseData()
-# cdef extern from 'grf/core/src/commons/SparseData.h':
-#   cdef cppclass SparseData(Data):
-#     SparseData(double* data, size_t num_rows, size_t num_cols);
-#
-# cdef extern from 'grf/core/src/commons/SparseData.cpp':
-#   pass
+
+# SparseData()
+cdef extern from 'grf/core/src/commons/SparseData.h':
+  cdef cppclass SparseData(Data):
+    SparseData(double* data, size_t num_rows, size_t num_cols);
+
+cdef extern from 'grf/core/src/commons/SparseData.cpp':
+  pass
+
 
 # Forest()
 cdef extern from 'grf/core/src/forest/Forest.h':
@@ -55,13 +60,6 @@ cdef extern from 'grf/core/src/forest/Forest.h':
 cdef extern from 'grf/core/src/forest/Forest.cpp':
       pass
 
-# Tree()
-cdef extern from 'grf/core/src/tree/Tree.h':
-  cdef cppclass Tree:
-    pass
-
-cdef extern from 'grf/core/src/tree/Tree.cpp':
-      pass
 
 # ForestSerializer()
 cdef extern from 'grf/core/src/serialization/ForestSerializer.h':
@@ -71,6 +69,7 @@ cdef extern from 'grf/core/src/serialization/ForestSerializer.h':
 
 cdef extern from 'grf/core/src/serialization/ForestSerializer.cpp':
   pass
+
 
 # ForestOptions()
 cdef extern from 'grf/core/src/forest/ForestOptions.h':
@@ -86,6 +85,7 @@ cdef extern from 'grf/core/src/forest/ForestOptions.h':
 cdef extern from 'grf/core/src/forest/ForestOptions.cpp':
   pass
 
+
 # ForestTrainer()
 cdef extern from 'grf/core/src/forest/ForestTrainer.h':
   cdef cppclass ForestTrainer:
@@ -95,6 +95,7 @@ cdef extern from 'grf/core/src/forest/ForestTrainer.h':
                   shared_ptr[OptimizedPredictionStrategy] prediction_strategy);
 
     const Forest train(const Data* data, const ForestOptions& options) const;
+
 
 cdef extern from 'grf/core/src/forest/ForestTrainer.cpp':
   pass
@@ -107,6 +108,7 @@ cdef extern from 'grf/core/src/forest/ForestTrainers.h':
 
 cdef extern from 'grf/core/src/forest/ForestTrainers.cpp':
   pass
+
 
 # ForestPredictor()
 cdef extern from 'grf/core/src/forest/ForestPredictor.h':
@@ -123,6 +125,7 @@ cdef extern from 'grf/core/src/forest/ForestPredictor.h':
 cdef extern from 'grf/core/src/forest/ForestPredictor.cpp':
   pass
 
+
 # ForestPredictors()
 cdef extern from 'grf/core/src/forest/ForestPredictors.h':
   cdef cppclass ForestPredictors:
@@ -136,60 +139,15 @@ cdef extern from 'grf/core/src/forest/ForestPredictors.h':
 cdef extern from 'grf/core/src/forest/ForestPredictors.cpp':
   pass
 
-# RelabelingStrategy()
-cdef extern from 'grf/core/src/relabeling/RelabelingStrategy.h':
-  cdef cppclass RelabelingStrategy:
+
+# Tree()
+cdef extern from 'grf/core/src/tree/Tree.h':
+  cdef cppclass Tree:
     pass
 
-# SplittingRuleFactory()
-cdef extern from 'grf/core/src/splitting/factory/SplittingRuleFactory.h':
-  cdef cppclass SplittingRuleFactory:
-    pass
-
-# OptimizedPredictionStrategy()
-cdef extern from 'grf/core/src/prediction/OptimizedPredictionStrategy.h':
-  cdef cppclass OptimizedPredictionStrategy:
-    pass
-
-# CustomPredictionStrategy()
-cdef extern from 'grf/core/src/prediction/CustomPredictionStrategy.h':
-  cdef cppclass CustomPredictionStrategy:
-    pass
-
-cdef extern from 'grf/core/src/prediction/CustomPredictionStrategy.cpp':
+cdef extern from 'grf/core/src/tree/Tree.cpp':
   pass
 
-# DefaultPredictionCollectory()
-cdef extern from 'grf/core/src/prediction/collector/DefaultPredictionCollector.h':
-  cdef cppclass DefaultPredictionCollector:
-    pass
-
-cdef extern from 'grf/core/src/prediction/collector/DefaultPredictionCollector.cpp':
-  pass
-
-# OptimizedPredictionCollectory()
-cdef extern from 'grf/core/src/prediction/collector/OptimizedPredictionCollector.h':
-  cdef cppclass OptimizedPredictionCollector:
-    pass
-
-cdef extern from 'grf/core/src/prediction/collector/OptimizedPredictionCollector.cpp':
-  pass
-
-# QuantilePredictionStrategy()
-cdef extern from 'grf/core/src/prediction/QuantilePredictionStrategy.h':
-  cdef cppclass QuantilePredictionStrategy:
-    pass
-
-cdef extern from 'grf/core/src/prediction/QuantilePredictionStrategy.cpp':
-  pass
-
-# LocalLinearPredictionStrategy()
-cdef extern from 'grf/core/src/prediction/LocalLinearPredictionStrategy.h':
-  cdef cppclass LocalLinearPredictionStrategy:
-    pass
-
-cdef extern from 'grf/core/src/prediction/LocalLinearPredictionStrategy.cpp':
-  pass
 
 # Prediction()
 cdef extern from 'grf/core/src/prediction/Prediction.h':
@@ -203,3 +161,20 @@ cdef extern from 'grf/core/src/prediction/Prediction.h':
 
 cdef extern from 'grf/core/src/prediction/Prediction.cpp':
   pass
+
+# RelabelingStrategy()
+cdef extern from 'grf/core/src/relabeling/RelabelingStrategy.h':
+  cdef cppclass RelabelingStrategy:
+    pass
+
+
+# SplittingRuleFactory()
+cdef extern from 'grf/core/src/splitting/factory/SplittingRuleFactory.h':
+  cdef cppclass SplittingRuleFactory:
+    pass
+
+
+# OptimizedPredictionStrategy()
+cdef extern from 'grf/core/src/prediction/OptimizedPredictionStrategy.h':
+  cdef cppclass OptimizedPredictionStrategy:
+    pass

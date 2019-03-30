@@ -6,7 +6,7 @@ Misc
 
 * `@boundscheck` and `@wraparound`
 
-* Cython profiling yellow lines)
+* Cython profiling yellow lines) (linetrace False after)
 
 * `from cython cimport numeric/floating`
 
