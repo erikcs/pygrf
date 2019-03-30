@@ -2,6 +2,16 @@
 
 # pygrf
 
+#### Installation
+(requires: `numpy`, `cython`, C++ compiler)
+
 ```bash
-$ python setup.py develop
+pip install git+https://github.com/erikcs/pygrf.git
+```
+
+or
+
+```bash
+git clone https://github.com/erikcs/pygrf.git
+pip install -e .
 ```

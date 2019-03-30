@@ -2,7 +2,7 @@ import numpy
 import os
 import sys
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from distutils.core import Extension
 from Cython.Build import cythonize
 
@@ -66,5 +66,6 @@ ext = Extension(
 setup(
     name='pygrf',
     version='0.0.1',
+    packages=find_packages(include=['pygrf']),
     ext_modules=cythonize(ext, compiler_directives={'language_level': 3})
 )
