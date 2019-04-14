@@ -120,8 +120,8 @@ cdef extern from 'grf/core/src/forest/ForestPredictor.h':
                                    Data*,
                                    bool estimate_variance) const
         vector[Prediction] predict_oob(const Forest& forest,
-                                  Data* train_data,
-                                  bool estimate_variance) const
+                                       Data* train_data,
+                                       bool estimate_variance) const
 
 cdef extern from 'grf/core/src/forest/ForestPredictor.cpp':
     pass
@@ -134,8 +134,8 @@ cdef extern from 'grf/core/src/forest/ForestPredictors.h':
         ForestPredictor regression_predictor(uint num_threads)
         @staticmethod
         ForestPredictor local_linear_predictor(
-                  uint num_threads, vector[double] lambdas, bool weighted_penalty,
-                  vector[size_t] linear_correction_variables)
+            uint num_threads, vector[double] lambdas, bool weighted_penalty,
+            vector[size_t] linear_correction_variables)
 
 cdef extern from 'grf/core/src/forest/ForestPredictors.cpp':
     pass
