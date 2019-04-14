@@ -55,12 +55,12 @@ GRF_SOURCES = [
 ]
 
 ext = Extension(
-        'pygrf.ext',
-        language='c++',
-        sources=SOURCES + GRF_SOURCES,
-        extra_compile_args=COMPILE_ARGS,
-        extra_link_args=LINK_ARGS,
-        include_dirs=INCLUDE_DIRS
+    'pygrf.ext',
+    language='c++',
+    sources=SOURCES + GRF_SOURCES,
+    extra_compile_args=COMPILE_ARGS,
+    extra_link_args=LINK_ARGS,
+    include_dirs=INCLUDE_DIRS
 )
 
 setup(
