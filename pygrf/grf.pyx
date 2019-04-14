@@ -1,9 +1,10 @@
+from pygrf.grfheaders cimport *
+from cython.operator cimport dereference as deref
 import cython
 import numpy as np
 cimport numpy as np
-from cython.operator cimport dereference as deref
 
-from pygrf.grfheaders cimport *
+
 cdef int SMAX = 2147483647
 
 # Utils
@@ -68,7 +69,7 @@ cdef class _Data:
             self.data.set_outcome_index(p)
             self.data.sort()
         else:
-            self.fdata = np.asfortranarray(X) #TODO: doesn't have to be copied
+            self.fdata = np.asfortranarray(X)  # TODO: doesn't have to be copied
             ncols = p
             self.data = new DefaultData(&self.fdata[0, 0], n, ncols)
 
@@ -84,40 +85,41 @@ cdef class _ForestOptions:
 
     cdef ForestOptions* options
 
-    def __cinit__(self,
-      uint num_trees=2000,
-      size_t ci_group_size=2,
-      double sample_fraction=0.5,
-      int mtry=-1,
-      uint min_node_size=5,
-      bool honesty=True,
-      double honesty_fraction=0.5,
-      double alpha=0.05,
-      double imbalance_penalty=0,
-      uint num_threads=0,
-      uint seed=np.random.randint(0, SMAX, 1)[0],
-      np.ndarray[dtype=np.intp_t, ndim=1] clusters=np.empty(0, dtype=int),
-      # long[::1] clusters=np.empty(0, dtype=int),
-      uint samples_per_cluster=0):
+    def __cinit__(
+        self,
+        uint num_trees=2000,
+        size_t ci_group_size=2,
+        double sample_fraction=0.5,
+        int mtry=-1,
+        uint min_node_size=5,
+        bool honesty=True,
+        double honesty_fraction=0.5,
+        double alpha=0.05,
+        double imbalance_penalty=0,
+        uint num_threads=0,
+        uint seed=np.random.randint(0, SMAX, 1)[0],
+        np.ndarray[dtype=np.intp_t, ndim=1] clusters=np.empty(0, dtype=int),
+        # long[::1] clusters=np.empty(0, dtype=int),
+        uint samples_per_cluster=0):
 
         assert 0 < alpha < 0.25
         assert 0 <= sample_fraction <= 1
         assert imbalance_penalty >= 0
 
         self.options = new ForestOptions(
-         ForestOptions(<uint> num_trees,
-                      <size_t> ci_group_size,
-                      <double> sample_fraction,
-                      <uint> mtry,
-                      <uint> min_node_size,
-                      <bool> honesty,
-                      <double> honesty_fraction,
-                      <double> alpha,
-                      <double> imbalance_penalty,
-                      <uint> num_threads,
-                      <uint> seed,
-                      <const vector[size_t]&> clusters,
-                      <uint> samples_per_cluster))
+            ForestOptions(<uint> num_trees,
+                          <size_t> ci_group_size,
+                          <double> sample_fraction,
+                          <uint> mtry,
+                          <uint> min_node_size,
+                          <bool> honesty,
+                          <double> honesty_fraction,
+                          <double> alpha,
+                          <double> imbalance_penalty,
+                          <uint> num_threads,
+                          <uint> seed,
+                          <const vector[size_t]&> clusters,
+                          <uint> samples_per_cluster))
 
     def __dealloc__(self):
         del self.options
@@ -150,19 +152,19 @@ cdef class _RegressionPredictor:
 
     def __cinit__(self, kind, uint num_threads=0):
         self.predictor = new ForestPredictor(
-          ForestPredictors.regression_predictor(num_threads))
+            ForestPredictors.regression_predictor(num_threads))
 
     cdef predict(self, Data* train_data, Data* data, const Forest& forest,
                  bool estimate_variance=False):
         self.predictions = new vector[Prediction](
-          self.predictor.predict(forest, train_data, data, estimate_variance))
+            self.predictor.predict(forest, train_data, data, estimate_variance))
 
         return self._create_predictions()
 
     cdef predict_oob(self, Data* train_data, const Forest& forest,
                      bool estimate_variance=False):
         self.predictions = new vector[Prediction](
-           self.predictor.predict_oob(forest, train_data, estimate_variance))
+            self.predictor.predict_oob(forest, train_data, estimate_variance))
 
         return self._create_predictions()
 
@@ -213,25 +215,26 @@ cdef class RegressionForest:
     cdef _RegressionTrainer trainer
     cdef _ForestOptions options
 
-    def __cinit__(self,
-      sample_fraction=0.5,
-      mtry=-1,
-      num_trees=2000,
-      num_threads=0,
-      min_node_size=5,
-      honesty=True,
-      honesty_fraction=0.5,
-      ci_group_size=2,
-      alpha=0.05,
-      imbalance_penalty=0,
-      compute_oob_predictions=True,
-      seed=np.random.randint(0, SMAX, 1)[0],
-      clusters=np.empty(0, dtype=int),
-      samples_per_cluster=0,
-      tune_parameters=False,
-      num_fit_trees=10,
-      num_fit_reps=100,
-      num_optimize_reps=1000):
+    def __cinit__(
+        self,
+        sample_fraction=0.5,
+        mtry=-1,
+        num_trees=2000,
+        num_threads=0,
+        min_node_size=5,
+        honesty=True,
+        honesty_fraction=0.5,
+        ci_group_size=2,
+        alpha=0.05,
+        imbalance_penalty=0,
+        compute_oob_predictions=True,
+        seed=np.random.randint(0, SMAX, 1)[0],
+        clusters=np.empty(0, dtype=int),
+        samples_per_cluster=0,
+        tune_parameters=False,
+        num_fit_trees=10,
+        num_fit_reps=100,
+        num_optimize_reps=1000):
 
         self.sample_fraction = sample_fraction
         self.mtry = mtry
@@ -261,11 +264,12 @@ cdef class RegressionForest:
         self._tune_regression_forest()
 
         self.trainer = _RegressionTrainer()
-        self.options = _ForestOptions(self.num_trees, self.ci_group_size,
-                        self.sample_fraction,self.mtry, self.min_node_size,
-                        self.honesty, self.honesty_fraction, self.alpha,
-                        self.imbalance_penalty, self.num_threads,
-                        self.seed, self.clusters, self.samples_per_cluster)
+        self.options = _ForestOptions(
+            self.num_trees, self.ci_group_size,
+            self.sample_fraction, self.mtry, self.min_node_size,
+            self.honesty, self.honesty_fraction, self.alpha,
+            self.imbalance_penalty, self.num_threads,
+            self.seed, self.clusters, self.samples_per_cluster)
 
         self.trainer.train(self.traindata.data, deref(self.options.options))
 

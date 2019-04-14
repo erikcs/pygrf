@@ -2,8 +2,8 @@ name: pygrf
 channels:
   - defaults
 dependencies:
+  - python>=3
   - cython
   - numpy
-  - python>=3
-
+  - flake8
   - pytest
